@@ -35,3 +35,13 @@ index 9a868ce..80e9366 100644
          download_bochscpu_build(url.as_str());
      }
  
+@@ -366,4 +369,9 @@ fn main() {
+     println!("cargo:rustc-link-lib=static=cpudb");
+     println!("cargo:rustc-link-lib=static=avx");
+     println!("cargo:rustc-link-lib=static=softfloat");
++
++    #[cfg(target_os = "macos")]
++    println!("cargo:rustc-link-lib=c++");
++    #[cfg(target_os = "linux")]
++    println!("cargo:rustc-link-lib=stdc++");
+ }
