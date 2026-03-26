@@ -17,7 +17,7 @@ fi
 
 cd bochscpu-build
 git checkout tags/v0.5
-BOCHS_REV=$(cat BOCHS_REV) bash prep.sh && cd Bochs/bochs && sh .conf.cpu && make cpu/libcpu.a  cpu/fpu/libfpu.a cpu/avx/libavx.a cpu/cpudb/libcpudb.a cpu/softfloat3e/libsoftfloat.a
+BOCHS_REV=$(cat BOCHS_REV) bash prep.sh && cd Bochs/bochs && sh .conf.cpu && make cpu/libcpu.a cpu/fpu/libfpu.a cpu/avx/libavx.a cpu/cpudb/libcpudb.a cpu/softfloat3e/libsoftfloat.a
 
 # Remove old files in bochscpu.
 rm -rf ../../../bochscpu/bochs
