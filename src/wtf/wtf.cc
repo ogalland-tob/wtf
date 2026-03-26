@@ -231,7 +231,7 @@ int main(int argc, const char *argv[]) {
 
       {"whv", BackendType_t::Whv}
 #endif
-#ifdef LINUX
+#ifdef HAS_KVM
       //
       // KVM supports is only available on Linux.
       //
@@ -431,7 +431,7 @@ int main(int argc, const char *argv[]) {
   }
 #endif
 
-#ifdef LINUX
+#ifdef HAS_KVM
   case BackendType_t::Kvm: {
     g_Backend = new KvmBackend_t();
     break;

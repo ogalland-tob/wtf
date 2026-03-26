@@ -5,6 +5,8 @@
 #define ARCH_X86
 #elif defined(__amd64__) || defined(_M_X64)
 #define ARCH_X64
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#define ARCH_AARCH64
 #else
 #error Architecture not supported.
 #endif
@@ -31,6 +33,8 @@
 #define LINUX_X86
 #elif defined ARCH_X64
 #define LINUX_X64
+#elif defined ARCH_AARCH64
+#define LINUX_AARCH64
 #endif
 
 #elif defined(__APPLE__)
@@ -40,6 +44,8 @@
 #define OSX_X86
 #elif defined ARCH_X64
 #define OSX_X64
+#elif defined ARCH_AARCH64
+#define OSX_AARCH64
 #endif
 
 #else

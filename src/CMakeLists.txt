@@ -29,8 +29,8 @@ file(
     ${CMAKE_CURRENT_LIST_DIR}/libs/libfuzzer/*.cpp
 )
 
-set(
-    blake3_srcfiles
+add_library(
+    blake3 STATIC
     ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3.c
     ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_dispatch.c
     ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_portable.c
@@ -40,7 +40,6 @@ add_executable(
     wtf
     ${wtf_srcfiles}
     ${libfuzzer_srcfiles}
-    ${blake3_srcfiles}
 )
 
 add_compile_definitions(FMT_HEADER_ONLY)
@@ -108,27 +107,41 @@ if (WIN32)
 else (WIN32)
     enable_language(ASM)
     find_package(Threads)
-    target_sources(
-        wtf
-        PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_sse41_x86-64_unix.S
-        ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_sse2_x86-64_unix.S
-        ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_avx2_x86-64_unix.S
 
-        # libbochscpu_ffi.a already links this so will lead to multiple definition errors like in the below:
-        #    ```
-        #   `blake3_compress_in_place_avx512':
-        #   (.text+0x3780): multiple definition of `_blake3_compress_in_place_avx512'; CMakeFiles/wtf.dir/libs/BLAKE3/c/blake3_avx512_x86-64_unix.S.o:(.text+0x3740): first defined here
-        #   /usr/bin/ld: /home/runner/work/wtf/wtf/src/libs/bochscpu-bins/lib/libbochscpu_ffi.a(b8423798394d5395-blake3_avx512_x86-64_unix.o)
-        #   ```
-        # ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_avx512_x86-64_unix.S
-    )
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
+        target_compile_definitions(wtf PRIVATE BLAKE3_USE_NEON=1)
+        target_compile_definitions(blake3 PRIVATE BLAKE3_USE_NEON=1)
+        # libbochscpu_ffi.a bundles blake3_compress_in_place_portable.
+        # Rename our copy to avoid duplicate symbols at link time.
+        target_compile_definitions(blake3 PRIVATE
+            blake3_compress_in_place_portable=_wtf_blake3_compress_in_place_portable
+        )
+    else()
+        target_sources(
+            wtf
+            PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_sse41_x86-64_unix.S
+            ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_sse2_x86-64_unix.S
+            ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_avx2_x86-64_unix.S
+
+            # libbochscpu_ffi.a already links this so will lead to multiple definition errors like in the below:
+            #    ```
+            #   `blake3_compress_in_place_avx512':
+            #   (.text+0x3780): multiple definition of `_blake3_compress_in_place_avx512'; CMakeFiles/wtf.dir/libs/BLAKE3/c/blake3_avx512_x86-64_unix.S.o:(.text+0x3740): first defined here
+            #   /usr/bin/ld: /home/runner/work/wtf/wtf/src/libs/bochscpu-bins/lib/libbochscpu_ffi.a(b8423798394d5395-blake3_avx512_x86-64_unix.o)
+            #   ```
+            # ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_avx512_x86-64_unix.S
+        )
+    endif()
 
     target_link_libraries(
         wtf
         ${CMAKE_THREAD_LIBS_INIT}
-        dl
     )
+
+    if(NOT APPLE)
+        target_link_libraries(wtf dl)
+    endif()
 endif(WIN32)
 
 target_precompile_headers(
@@ -139,6 +152,7 @@ target_precompile_headers(
 
 target_link_libraries(
     wtf
+    blake3
     ${CMAKE_CURRENT_LIST_DIR}/libs/bochscpu-bins/lib/${CMAKE_SHARED_MODULE_PREFIX}bochscpu_ffi${CMAKE_STATIC_LIBRARY_SUFFIX}
     kdmp-parser
 )

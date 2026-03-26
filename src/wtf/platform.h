@@ -5,6 +5,8 @@
 #define ARCH_X86
 #elif defined(__amd64__) || defined(_M_X64)
 #define ARCH_X64
+#elif defined(__aarch64__) || defined(_M_ARM64)
+#define ARCH_AARCH64
 #else
 #error Platform not supported.
 #endif
@@ -22,28 +24,38 @@ using ssize_t = SSIZE_T;
 #define WINDOWS_X86
 #elif defined ARCH_X64
 #define WINDOWS_X64
+#elif defined ARCH_AARCH64
+#define WINDOWS_AARCH64
 #endif
 #elif defined(linux) || defined(__linux) || defined(__FreeBSD__) ||            \
     defined(__FreeBSD_kernel__) || defined(__MACH__)
 #define LINUX
 
-#if defined(linux) || defined(__linux)
+#if defined(__MACH__)
+#define SYSTEM_PLATFORM "macOS"
+#elif defined(linux) || defined(__linux)
 #define SYSTEM_PLATFORM "Linux"
+#define HAS_KVM
+#endif
 
 #include <cstdlib>
+#include <sys/mman.h>
+#include <unistd.h>
 
+#if defined(ARCH_AARCH64)
+#define __debugbreak() __builtin_debugtrap()
+#else
 #define __debugbreak() __asm__("int $3")
+#endif
 #define ExitProcess(x) exit(x)
 #define aligned_free(x) free(x)
-
-#else
-#error An error occured
-#endif
 
 #if defined ARCH_X86
 #define LINUX_X86
 #elif defined ARCH_X64
 #define LINUX_X64
+#elif defined ARCH_AARCH64
+#define LINUX_AARCH64
 #endif
 
 #else
