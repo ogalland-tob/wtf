@@ -153,6 +153,6 @@ target_precompile_headers(
 target_link_libraries(
     wtf
     blake3
-    ${CMAKE_CURRENT_LIST_DIR}/libs/bochscpu-bins/lib/${CMAKE_SHARED_MODULE_PREFIX}bochscpu_ffi${CMAKE_STATIC_LIBRARY_SUFFIX}
+    ${CMAKE_CURRENT_LIST_DIR}/libs/bochscpu-bins/lib/${CMAKE_SHARED_MODULE_PREFIX}bochscpu_ffi_${CMAKE_SYSTEM_PROCESSOR}${CMAKE_STATIC_LIBRARY_SUFFIX}
     kdmp-parser
 )
