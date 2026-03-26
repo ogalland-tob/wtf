@@ -9,9 +9,10 @@ git clone https://github.com/yrp604/bochscpu-build.git
 git clone https://github.com/yrp604/bochscpu
 git clone https://github.com/yrp604/bochscpu-ffi
 
-# Patch bochscpu/build.rs to add macOS support.
+# Apply macOS-specific build fixes.
 if [ "$(uname)" = "Darwin" ]; then
     git -C bochscpu apply ../../bochscpu-macos.patch
+    export MACOSX_DEPLOYMENT_TARGET="$(sw_vers -productVersion)"
 fi
 
 cd bochscpu-build
