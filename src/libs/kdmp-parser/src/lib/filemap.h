@@ -222,7 +222,7 @@ public:
   }
 };
 
-#elif defined(LINUX)
+#elif defined(POSIX)
 
 class FileMap_t {
   void *ViewBase_ = nullptr;
