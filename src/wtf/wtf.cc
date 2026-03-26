@@ -191,7 +191,7 @@ int main(int argc, const char *argv[]) {
               EXIT_FAILURE);
         }
 
-#ifdef LINUX
+#ifdef POSIX
         if (!fs::exists(Opts.SymbolFilePath)) {
           throw CLI::ParseError(
               fmt::format("Expected to find a state/symbol-store.json file in "
@@ -342,7 +342,7 @@ int main(int argc, const char *argv[]) {
           Opts.Fuzz.Seed = (uint64_t(R()) << 32) | R();
         }
 
-#ifdef LINUX
+#ifdef POSIX
         if (!fs::exists(Opts.SymbolFilePath)) {
           throw CLI::ParseError(
               fmt::format("Expected to find a state/symbol-store.json file in "

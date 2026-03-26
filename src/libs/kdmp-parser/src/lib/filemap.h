@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 
-#if defined(LINUX)
+#if defined(POSIX)
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>

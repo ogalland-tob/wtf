@@ -29,13 +29,15 @@ using ssize_t = SSIZE_T;
 #endif
 #elif defined(linux) || defined(__linux) || defined(__FreeBSD__) ||            \
     defined(__FreeBSD_kernel__) || defined(__MACH__)
-#define LINUX
+#define POSIX
 
 #if defined(__MACH__)
 #define SYSTEM_PLATFORM "macOS"
 #elif defined(linux) || defined(__linux)
 #define SYSTEM_PLATFORM "Linux"
 #define HAS_KVM
+#else
+#error An error occured
 #endif
 
 #include <cstdlib>
@@ -50,12 +52,22 @@ using ssize_t = SSIZE_T;
 #define ExitProcess(x) exit(x)
 #define aligned_free(x) free(x)
 
+#if defined(__MACH__)
+#if defined ARCH_X86
+#define OSX_X86
+#elif defined ARCH_X64
+#define OSX_X64
+#elif defined ARCH_AARCH64
+#define OSX_AARCH64
+#endif
+#else
 #if defined ARCH_X86
 #define LINUX_X86
 #elif defined ARCH_X64
 #define LINUX_X64
 #elif defined ARCH_AARCH64
 #define LINUX_AARCH64
+#endif
 #endif
 
 #else

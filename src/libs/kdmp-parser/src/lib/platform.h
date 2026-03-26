@@ -24,7 +24,7 @@
 
 #elif defined(linux) || defined(__linux) || defined(__FreeBSD__) ||            \
     defined(__FreeBSD_kernel__) || defined(__MACH__)
-#define LINUX
+#define POSIX
 
 #if defined(linux) || defined(__linux)
 #define SYSTEM_PLATFORM "Linux"
