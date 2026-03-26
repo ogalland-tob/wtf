@@ -44,11 +44,13 @@ export RUSTFLAGS="-C target-feature=+crt-static"
 cargo clean
 # Why do we need this `--target`? Well I'm not sure.. but https://github.com/rust-lang/rust/issues/78210 :(
 # cargo build --target x86_64-unknown-linux-gnu
-if [ "$(uname -m)" = "x86_64" ]; then
-    cargo build --release --target x86_64-unknown-linux-gnu
-else
-    cargo build --release
-fi
+# macOS (arm64) reports uname -m as "arm64" and works without --target.
+case "$(uname -m)" in
+    x86_64)  cargo build --release --target x86_64-unknown-linux-gnu ;;
+    aarch64) cargo build --release --target aarch64-unknown-linux-gnu ;;
+    arm64)   cargo build --release ;;
+    *)       echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
 
 # Get back to where we were.
 popd
