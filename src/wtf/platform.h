@@ -35,7 +35,14 @@ using ssize_t = SSIZE_T;
 #define SYSTEM_PLATFORM "macOS"
 #elif defined(linux) || defined(__linux)
 #define SYSTEM_PLATFORM "Linux"
+// HAS_KVM is only defined on x86_64 because the KVM backend uses
+// x86-specific KVM structures (kvm_lapic_state, kvm_regs, kvm_sregs,
+// etc.) that do not exist in the arm64 KVM ABI. Porting the KVM
+// backend to arm64 would require a separate implementation using
+// the arm64 KVM one_reg interface.
+#if defined(ARCH_X64)
 #define HAS_KVM
+#endif
 #else
 #error An error occured
 #endif
@@ -45,7 +52,12 @@ using ssize_t = SSIZE_T;
 #include <unistd.h>
 
 #if defined(ARCH_AARCH64)
+#if defined(__clang__)
 #define __debugbreak() __builtin_debugtrap()
+#else
+#include <signal.h>
+#define __debugbreak() raise(SIGTRAP)
+#endif
 #else
 #define __debugbreak() __asm__("int $3")
 #endif
