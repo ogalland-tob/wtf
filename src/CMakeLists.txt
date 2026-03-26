@@ -53,7 +53,7 @@ add_executable(
 add_compile_definitions(FMT_HEADER_ONLY)
 set_property(TARGET wtf PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
-if (WIN32)
+if(WIN32)
     enable_language(ASM_MASM)
     # This is for winsock / windows.h; without this windows.h imports socket.
     # https://docs.microsoft.com/en-us/windows/win32/iphlp/creating-a-basic-ip-helper-application
@@ -112,9 +112,14 @@ if (WIN32)
         hevd_client
         hevd_client/hevd_client.cc
     )
-else (WIN32)
+elseif(UNIX)
     enable_language(ASM)
     find_package(Threads)
+    target_link_libraries(wtf ${CMAKE_THREAD_LIBS_INIT})
+
+    if(NOT APPLE)
+        target_link_libraries(wtf dl)
+    endif()
 
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
         target_compile_definitions(wtf PRIVATE BLAKE3_USE_NEON=1)
@@ -124,7 +129,7 @@ else (WIN32)
         target_compile_definitions(blake3 PRIVATE
             blake3_compress_in_place_portable=_wtf_blake3_compress_in_place_portable
         )
-    else()
+    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
         target_sources(
             wtf
             PRIVATE
@@ -140,17 +145,12 @@ else (WIN32)
             #   ```
             # ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_avx512_x86-64_unix.S
         )
+    else()
+        message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
     endif()
-
-    target_link_libraries(
-        wtf
-        ${CMAKE_THREAD_LIBS_INIT}
-    )
-
-    if(NOT APPLE)
-        target_link_libraries(wtf dl)
-    endif()
-endif(WIN32)
+else()
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
 target_precompile_headers(
     wtf
