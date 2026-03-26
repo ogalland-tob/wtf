@@ -98,3 +98,27 @@ jobs:
           name: bin-lin64-${{ matrix.compiler }}.Release
           path: |
             src/build/wtf
+
+  macOS:
+    runs-on: macos-latest
+    name: macOS latest / arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installing dependencies
+        run: |
+          brew install ninja
+
+      - name: Build
+        run: |
+          cd src/build
+          chmod u+x ./build-release.sh
+          ./build-release.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bin-macos-arm64.Release
+          path: |
+            src/build/wtf
