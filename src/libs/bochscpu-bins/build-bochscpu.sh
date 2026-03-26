@@ -9,6 +9,11 @@ git clone https://github.com/yrp604/bochscpu-build.git
 git clone https://github.com/yrp604/bochscpu
 git clone https://github.com/yrp604/bochscpu-ffi
 
+# Patch bochscpu/build.rs to add macOS support.
+if [ "$(uname)" = "Darwin" ]; then
+    git -C bochscpu apply ../../bochscpu-macos.patch
+fi
+
 cd bochscpu-build
 git checkout tags/v0.5
 BOCHS_REV=$(cat BOCHS_REV) bash prep.sh && cd Bochs/bochs && sh .conf.cpu && make || true
@@ -38,7 +43,11 @@ export RUSTFLAGS="-C target-feature=+crt-static"
 cargo clean
 # Why do we need this `--target`? Well I'm not sure.. but https://github.com/rust-lang/rust/issues/78210 :(
 # cargo build --target x86_64-unknown-linux-gnu
-cargo build --release --target x86_64-unknown-linux-gnu
+case "$(uname)" in
+    Linux)  cargo build --release --target x86_64-unknown-linux-gnu ;;
+    Darwin) cargo build --release ;;
+    *)      echo "Unsupported platform: $(uname)" >&2; exit 1 ;;
+esac
 
 # Get back to where we were.
 popd
