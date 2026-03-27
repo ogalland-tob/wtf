@@ -78,7 +78,6 @@ cd ../../bochscpu-ffi
 
 export RUSTFLAGS="-C target-feature=+crt-static"
 cargo clean
-# macOS (arm64) reports uname -m as "arm64" and works without --target.
 case "$(uname)" in
     Linux)
         # Why do we need this `--target`? Well I'm not sure.. but https://github.com/rust-lang/rust/issues/78210 :(
