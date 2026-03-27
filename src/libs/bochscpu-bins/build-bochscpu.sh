@@ -10,30 +10,12 @@ git clone https://github.com/yrp604/bochscpu
 git clone https://github.com/yrp604/bochscpu-ffi
 
 if [ "$(uname)" = "Darwin" ]; then
-    # Apply some workaround for macos, this can be removed once macos support is properly integrated into bochscpu
+    # Apply some workaround for macos, this can be removed once bochscpu-build starts providing releases for macos
     git -C bochscpu apply - <<'PATCH'
 diff --git a/build.rs b/build.rs
 index 9a868ce..80e9366 100644
 --- a/build.rs
 +++ b/build.rs
-@@ -37,6 +37,8 @@ fn get_bochscpu_build_url(version: Option<&str>) -> (String, String) {
-     let filename: &str = "bochscpu-build-ubuntu-latest-x64.zip";
-     #[cfg(all(target_arch = "aarch64", target_os = "linux"))]
-     let filename: &str = "bochscpu-build-ubuntu-24.04-arm-arm64.zip";
-+    #[cfg(all(target_arch = "aarch64", target_os = "macos"))]
-+    let filename: &str = "bochscpu-build-macos-latest-arm64.zip";
-
-     let asset = js["assets"]
-         .members()
-@@ -57,7 +61,7 @@ fn download_bochscpu_build(url: &str) {
-         "Release"
-     };
-
--    #[cfg(target_os = "linux")]
-+    #[cfg(any(target_os = "linux", target_os = "macos"))]
-     let tempfile = std::path::PathBuf::from(format!(
-         "{}/bochscpu-build-{}.zip",
-         std::env::var("TEMP").unwrap_or("/tmp".to_string()),
 @@ -82,10 +86,9 @@ fn download_bochscpu_build(url: &str) {
  }
 
