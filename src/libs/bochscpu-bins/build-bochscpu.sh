@@ -57,7 +57,7 @@ BOCHS_REV=$(cat BOCHS_REV) bash prep.sh && cd Bochs/bochs && sh .conf.cpu && mak
 
 # Remove old files in bochscpu.
 rm -rf ../../../bochscpu/bochs
-rm -rf ../../../bochscpu/libs
+rm -rf ../../../bochscpu/lib
 
 # Create the libs directory where we stuff all the libs.
 mkdir ../../../bochscpu/lib
@@ -78,14 +78,16 @@ cd ../../bochscpu-ffi
 
 export RUSTFLAGS="-C target-feature=+crt-static"
 cargo clean
-# Why do we need this `--target`? Well I'm not sure.. but https://github.com/rust-lang/rust/issues/78210 :(
-# cargo build --target x86_64-unknown-linux-gnu
 # macOS (arm64) reports uname -m as "arm64" and works without --target.
-case "$(uname -m)" in
-    x86_64)  cargo build --release --target x86_64-unknown-linux-gnu ;;
-    aarch64) cargo build --release --target aarch64-unknown-linux-gnu ;;
-    arm64)   cargo build --release ;;
-    *)       echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+case "$(uname)" in
+    Linux)
+        # Why do we need this `--target`? Well I'm not sure.. but https://github.com/rust-lang/rust/issues/78210 :(
+	cargo build --release --target $(uname -m)-unknown-linux-gnu ;;
+    Darwin)
+        # macOS (arm64) works without --target.
+        cargo build --release ;;
+    *)
+        echo "Unsupported platform: $(uname)" >&2; exit 1 ;;
 esac
 
 # Get back to where we were.
