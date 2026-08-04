@@ -61,8 +61,6 @@ if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64|x86_64|AMD64")
     message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
-# --- Windows ---
-
 if(WIN32)
     enable_language(ASM_MASM)
     # This is for winsock / windows.h; without this windows.h imports socket.
