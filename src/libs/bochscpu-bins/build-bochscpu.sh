@@ -10,31 +10,11 @@ git clone https://github.com/yrp604/bochscpu
 git clone https://github.com/yrp604/bochscpu-ffi
 
 if [ "$(uname)" = "Darwin" ]; then
-    # Apply some workaround for macos, this can be removed once bochscpu-build starts providing releases for macos
-    git -C bochscpu apply - <<'PATCH'
-diff --git a/build.rs b/build.rs
-index 9a868ce..80e9366 100644
---- a/build.rs
-+++ b/build.rs
-@@ -82,10 +86,9 @@ fn download_bochscpu_build(url: &str) {
- }
-
- fn main() {
--    let ver = std::env::var("BOCHSCPU_BUILD_VERSION").unwrap_or("latest".to_string());
--    let (_fname, url) = get_bochscpu_build_url(Some(ver.as_str()));
--
-     if !std::fs::exists("./lib").unwrap() {
-+        let ver = std::env::var("BOCHSCPU_BUILD_VERSION").unwrap_or("latest".to_string());
-+        let (_fname, url) = get_bochscpu_build_url(Some(ver.as_str()));
-         download_bochscpu_build(url.as_str());
-     }
-
-PATCH
     export MACOSX_DEPLOYMENT_TARGET="$(sw_vers -productVersion)"
 fi
 
 cd bochscpu-build
-git checkout tags/v0.5
+git checkout tags/v0.6
 BOCHS_REV=$(cat BOCHS_REV) bash prep.sh && cd Bochs/bochs && sh .conf.cpu && make cpu/libcpu.a cpu/fpu/libfpu.a cpu/avx/libavx.a cpu/cpudb/libcpudb.a cpu/softfloat3e/libsoftfloat.a
 
 # Remove old files in bochscpu.
