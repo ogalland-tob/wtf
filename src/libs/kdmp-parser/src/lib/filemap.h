@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 
-#if defined(POSIX)
+#if defined(LINUX)
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -222,7 +222,7 @@ public:
   }
 };
 
-#elif defined(POSIX)
+#elif defined(LINUX)
 
 class FileMap_t {
   void *ViewBase_ = nullptr;
