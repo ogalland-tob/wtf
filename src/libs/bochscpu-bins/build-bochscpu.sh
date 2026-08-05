@@ -28,7 +28,6 @@ cp cpu/fpu/libfpu.a ../../../bochscpu/lib/libfpu.a
 cp cpu/avx/libavx.a ../../../bochscpu/lib/libavx.a
 cp cpu/cpudb/libcpudb.a ../../../bochscpu/lib/libcpudb.a
 cp cpu/softfloat3e/libsoftfloat.a ../../../bochscpu/lib/libsoftfloat.a
-
 make all-clean
 
 # Now we want to copy the bochs directory over there.
