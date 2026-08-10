@@ -6,7 +6,7 @@
 #elif defined(__amd64__) || defined(_M_X64)
 #define ARCH_X64
 #elif defined(__aarch64__) || defined(_M_ARM64)
-#define ARCH_AARCH64
+#define ARCH_ARM64
 #else
 #error Platform not supported.
 #endif
@@ -24,8 +24,8 @@ using ssize_t = SSIZE_T;
 #define WINDOWS_X86
 #elif defined ARCH_X64
 #define WINDOWS_X64
-#elif defined ARCH_AARCH64
-#define WINDOWS_AARCH64
+#elif defined ARCH_ARM64
+#define WINDOWS_ARM64
 #endif
 #elif defined(linux) || defined(__linux) || defined(__FreeBSD__) ||            \
     defined(__FreeBSD_kernel__) || defined(__MACH__)
@@ -51,7 +51,7 @@ using ssize_t = SSIZE_T;
 #include <sys/mman.h>
 #include <unistd.h>
 
-#if defined(ARCH_AARCH64)
+#if defined(ARCH_ARM64)
 #if defined(__clang__)
 #define __debugbreak() __builtin_debugtrap()
 #else
@@ -69,16 +69,16 @@ using ssize_t = SSIZE_T;
 #define OSX_X86
 #elif defined ARCH_X64
 #define OSX_X64
-#elif defined ARCH_AARCH64
-#define OSX_AARCH64
+#elif defined ARCH_ARM64
+#define OSX_ARM64
 #endif
 #else
 #if defined ARCH_X86
 #define LINUX_X86
 #elif defined ARCH_X64
 #define LINUX_X64
-#elif defined ARCH_AARCH64
-#define LINUX_AARCH64
+#elif defined ARCH_ARM64
+#define LINUX_ARM64
 #endif
 #endif
 
