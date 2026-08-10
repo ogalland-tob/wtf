@@ -133,7 +133,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
-    target_compile_definitions(wtf PRIVATE BLAKE3_USE_NEON=1)
     target_compile_definitions(blake3 PRIVATE BLAKE3_USE_NEON=1)
     # libbochscpu_ffi.a bundles blake3_compress_in_place_portable.
     # Rename our copy to avoid duplicate symbols at link time.
