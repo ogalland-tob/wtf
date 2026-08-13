@@ -63,18 +63,13 @@ if(WIN32)
         ${CMAKE_CURRENT_LIST_DIR}/libs/BLAKE3/c/blake3_avx512_x86-64_windows_msvc.asm
     )
 
-    # https://docs.microsoft.com/en-us/cpp/build/reference/zc-cplusplus
     target_compile_options(
         wtf
         PRIVATE
-        "$<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>"
-    )
-
-    # /utf-8 for fmt
-    target_compile_options(
-        wtf
-        PRIVATE
+        # /utf-8 for fmt
         "$<$<COMPILE_LANGUAGE:CXX>:/utf-8>"
+        # https://docs.microsoft.com/en-us/cpp/build/reference/zc-cplusplus
+        "$<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus>"
     )
 
     # Delay loading dbgeng.dll:
@@ -88,6 +83,7 @@ if(WIN32)
         PRIVATE
         /DELAYLOAD:dbgeng.dll
     )
+
     target_link_libraries(
         wtf
         ws2_32.lib
