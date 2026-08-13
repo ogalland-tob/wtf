@@ -112,13 +112,6 @@ elseif(UNIX)
         target_link_libraries(wtf dl)
     endif()
 
-    if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-        execute_process(
-            COMMAND sw_vers -productVersion
-            OUTPUT_VARIABLE CMAKE_OSX_DEPLOYMENT_TARGET
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    endif()
 
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
         target_sources(
