@@ -4,14 +4,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-    execute_process(
-        COMMAND sw_vers -productVersion
-        OUTPUT_VARIABLE CMAKE_OSX_DEPLOYMENT_TARGET
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-endif()
-
 project(wtf)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/libs/bochscpu-bins/include)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/libs/robin-map/include)
@@ -122,6 +114,14 @@ elseif(UNIX)
     target_link_libraries(wtf ${CMAKE_THREAD_LIBS_INIT})
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         target_link_libraries(wtf dl)
+    endif()
+
+    if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+        execute_process(
+            COMMAND sw_vers -productVersion
+            OUTPUT_VARIABLE CMAKE_OSX_DEPLOYMENT_TARGET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
     endif()
 
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
