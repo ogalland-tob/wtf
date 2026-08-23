@@ -1,7 +1,7 @@
 // Axel '0vercl0k' Souchet - August 20 2026
 use std::collections::HashMap;
 use std::error::Error;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::Write;
 use std::ops::{Deref, DerefMut};
 use std::path::{Path, PathBuf};
@@ -76,9 +76,7 @@ type Result<T> = std::result::Result<T, Box<dyn Error>>;
 /// Get the URLs to the bochscpu-ffi zip files that contains the static library
 /// `wtf` needs for linking.
 fn fetch_bxcpuffi_zip_assets_urls() -> Result<(String, HashMap<String, String>)> {
-    let cli = ClientBuilder::new()
-        .user_agent("Mozilla/5.0 (platform; rv:gecko-version) Gecko/gecko-trail Firefox/15")
-        .build()?;
+    let cli = ClientBuilder::new().user_agent("Mozilla/5.0").build()?;
     let res = cli.get(BXCPUFFI_LATEST_RELEASE_LINK).send()?.text()?;
     let js: Value = serde_json::from_str(&res)?;
     let assets = js["assets"].as_array().ok_or("no assets?")?;
@@ -97,46 +95,52 @@ fn fetch_bxcpuffi_zip_assets_urls() -> Result<(String, HashMap<String, String>)>
     Ok((tag_name, zip_urls_by_name))
 }
 
-struct ScopedTempFilePath(PathBuf);
+struct TempFilePath(PathBuf);
 
-impl Drop for ScopedTempFilePath {
+impl Drop for TempFilePath {
     fn drop(&mut self) {
         println!("Cleaning up {}", self.0.display());
-        fs::remove_file(&self.0).unwrap();
+        // fs::remove_file(&self.0).unwrap();
     }
 }
 
-impl From<PathBuf> for ScopedTempFilePath {
+impl From<PathBuf> for TempFilePath {
     fn from(value: PathBuf) -> Self {
         Self(value)
     }
 }
 
-impl AsRef<Path> for ScopedTempFilePath {
+impl AsRef<Path> for TempFilePath {
     fn as_ref(&self) -> &Path {
         &self.0
     }
 }
 
-struct ScopedTempFile {
+/// Create a file in the temp directory (w/ read & write access, truncated if
+/// already exists), and clean it up on drop.
+struct TempFile {
     file: File,
-    _path: ScopedTempFilePath,
+    _path: TempFilePath,
 }
 
-impl ScopedTempFile {
+impl TempFile {
     fn new(filename: impl AsRef<Path>) -> Result<Self> {
-        let path = env::temp_dir().join(filename.as_ref()).into();
+        let path = env::temp_dir().join(filename.as_ref());
         let file = File::options()
             .truncate(true)
             .write(true)
             .read(true)
+            .create(true)
             .open(&path)?;
 
-        Ok(Self { file, _path: path })
+        Ok(Self {
+            file,
+            _path: path.into(),
+        })
     }
 }
 
-impl Deref for ScopedTempFile {
+impl Deref for TempFile {
     type Target = File;
 
     fn deref(&self) -> &Self::Target {
@@ -144,7 +148,7 @@ impl Deref for ScopedTempFile {
     }
 }
 
-impl DerefMut for ScopedTempFile {
+impl DerefMut for TempFile {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.file
     }
@@ -161,7 +165,7 @@ fn main() -> Result<()> {
             downloaded_zip_path.display()
         );
 
-        let mut downloaded_zip = ScopedTempFile::new(downloaded_zip_path)?;
+        let mut downloaded_zip = TempFile::new(downloaded_zip_path)?;
         io::copy(&mut reqwest::blocking::get(zip_url)?, &mut *downloaded_zip)?;
 
         let staticlib_path = format!("../lib/{}", staticlib_info.new_filename);
@@ -182,8 +186,8 @@ fn main() -> Result<()> {
     assert_eq!(zip_urls.len(), 1);
     println!("Extracted all the files!");
 
-    let mut version = File::create("../TAG")?;
-    write!(version, "{tag_name}")?;
+    let mut tag = File::create("../TAG")?;
+    write!(tag, "{tag_name}")?;
 
     Ok(())
 }
