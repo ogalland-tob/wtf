@@ -53,19 +53,19 @@ static BXCPUFFI_RELEASE_ZIP_FILENAMES: LazyLock<HashMap<&'static str, StaticLibI
 
         staticlibs!(
             "bochscpu-ffi-windows-latest-x64-MT.zip" => (
-                "release/bochscpu_ffi.lib",
+                "target/release/bochscpu_ffi.lib",
                 "bochscpu_ffi_Windows_AMD64.lib"
             )
             "bochscpu-ffi-ubuntu-latest-x64.zip" => (
-                "release/libbochscpu_ffi.a",
+                "target/release/libbochscpu_ffi.a",
                 "libbochscpu_ffi_Linux_x86_64.a"
             )
             "bochscpu-ffi-ubuntu-24.04-arm-arm64.zip" => (
-                "release/libbochscpu_ffi.a",
+                "target/release/libbochscpu_ffi.a",
                 "libbochscpu_ffi_Linux_aarch64.a"
             )
             "bochscpu-ffi-macos-latest-arm64.zip" => (
-                "release/libbochscpu_ffi.a",
+                "target/release/libbochscpu_ffi.a",
                 "libbochscpu_ffi_Darwin_arm64.a"
             )
         )
@@ -156,6 +156,7 @@ impl DerefMut for TempFile {
 
 fn main() -> Result<()> {
     println!("Getting the latest bochscpu-ffi assets URLs..");
+    let mut header_extracted = false;
     let (tag_name, mut zip_urls) = fetch_bxcpuffi_zip_assets_urls()?;
     for (zip_filename, staticlib_info) in BXCPUFFI_RELEASE_ZIP_FILENAMES.iter() {
         let zip_url = zip_urls.remove(*zip_filename).ok_or("entry is missing")?;
@@ -169,7 +170,7 @@ fn main() -> Result<()> {
         io::copy(&mut reqwest::blocking::get(zip_url)?, &mut *downloaded_zip)?;
 
         let staticlib_path = format!("../lib/{}", staticlib_info.new_filename);
-        let mut staticlib = File::create(&staticlib_path)?;
+        let mut staticlib_file = File::create(&staticlib_path)?;
         let mut zip = ZipArchive::new(&*downloaded_zip)?;
         println!(
             "Extracting {} into {staticlib_path}..",
@@ -178,8 +179,15 @@ fn main() -> Result<()> {
 
         io::copy(
             &mut zip.by_name(staticlib_info.path_in_zip)?,
-            &mut staticlib,
+            &mut staticlib_file,
         )?;
+
+        if !header_extracted {
+            println!("Extracting boschcpu.hpp..");
+            let mut header_file = File::create("../include/bochscpu.hpp")?;
+            io::copy(&mut zip.by_name("bochscpu.hpp")?, &mut header_file)?;
+            header_extracted = true;
+        }
     }
 
     // The only zip we don't 'consume' the windows-MD zip.
